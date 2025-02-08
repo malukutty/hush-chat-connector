@@ -1,8 +1,11 @@
 
 import { useState } from "react";
-import { Bell, BellOff, Menu, X } from "lucide-react";
+import { Bell, BellOff, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,7 +14,18 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
+  const navigate = useNavigate();
   const userId = "HU" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/auth");
+    } catch (error: any) {
+      toast.error("Error logging out");
+    }
+  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -54,6 +68,15 @@ export const Layout = ({ children }: LayoutProps) => {
               )}
             </Button>
           </div>
+
+          <Button
+            variant="ghost"
+            className="w-full text-secondary hover:text-secondary/90 justify-start"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-5 w-5 mr-2" />
+            Logout
+          </Button>
         </div>
       </aside>
 
